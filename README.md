@@ -1,4 +1,4 @@
-# Adult Census Income Classifier (TFX & Apache Airflow Pipeline)
+# Adult Census Income Classifier (TFX and Apache Airflow Pipeline)
 
 An end to end Machine Learning pipeline built using TensorFlow Extended (TFX) and Apache Airflow to predict whether an individual's income exceeds $50K per year based on census data.
 
@@ -10,7 +10,7 @@ This repository contains a production ready MLOps pipeline orchestrated with Apa
 
 ### Key Features
 * **Automated Data Ingestion:** Loads raw census data dynamically using TFX `ExampleGen`.
-* **Feature Preprocessing (`tf.Transform`):** Applies Z score normalization to continuous numeric features and dynamic vocabulary lookups with Out Of Vocabulary (OOV) buckets for categorical variables.
+* **Feature Preprocessing (`tf.Transform`):** Applies Z score normalization to continuous numeric features and dynamic vocabulary lookups with Out of Vocabulary (OOV) buckets for categorical variables.
 * **Deep Neural Network Architecture:** Built with the Keras Functional API, incorporating custom embedding layers, Batch Normalization, and Dropout to prevent overfitting.
 * **Pipeline Orchestration:** Workflow steps are managed and scheduled automatically using Apache Airflow DAGs.
 * **Experiment Tracking:** Real time loss, accuracy, and AUC logging through TensorBoard.
@@ -39,46 +39,85 @@ The model uses early stopping monitored on validation AUC (`val_auc`). Final res
 
 ***
 
+## Environment Compatibility Note
+
+The python bytecode in `__pycache__` targets `cpython-37`. The versions specified in `requirements.txt` (TFX 1.9.1 / Airflow 2.3.4 / TF 2.9.3) represent the last mutually compatible set on Python 3.7. **Use a Python 3.7 virtual environment** — newer TFX releases drop Airflow orchestration support, and newer Airflow releases drop Python 3.7 support.
+
+***
+
 ## Project Structure
 
 ```text
-dags/
-  adult_pipeline_airflow.py   # Airflow DAG workflow definition
-modules/
-  adult_trainer_module.py     # Preprocessing fn & Keras model logic
-README.md                       # Project documentation
-requirements.txt                # Python environment dependencies
+adult_census_tfx/
+├── adult_pipeline_definition.py   # create_pipeline() shared by both runners
+├── adult_pipeline_airflow.py      # Airflow DAG entry point
+├── adult_pipeline_local.py        # LocalDagRunner for rapid iteration without Airflow
+├── adult_trainer_module.py        # preprocessing_fn + run_fn (Transform/Trainer)
+├── requirements.txt               # Dependency specifications
+├── eda_analysis.ipynb             # Dataset correlation and EDA notebook
+├── tfma_analysis.ipynb            # TFMA fairness analysis and evaluation scaffold
+└── data/
+    └── adult.csv                  # Preprocessed census dataset
 ```
 
 ***
 
 ## Setup and Execution Guide
 
-### Step 1: Clone Repository and Setup Files
+### Step 1: Set up or Activate Virtual Environment
+
+If you already created a virtual environment (such as `tfx-env` or `tfx-airflow-env`), activate it:
 
 ```bash
-git clone [https://github.com/paocent/ML-OPS---Revised.git](https://github.com/paocent/ML-OPS---Revised.git) && cd ML-OPS---Revised && pip install -r requirements.txt && mkdir -p ~/airflow/dags/adult_census_tfx && cp dags/adult_pipeline_airflow.py ~/airflow/dags/adult_census_tfx/ && cp modules/adult_trainer_module.py ~/airflow/dags/adult_census_tfx/
+source tfx-env/bin/activate
+# or: source tfx-airflow-env/bin/activate
 ```
 
-### Step 2: Start Airflow Services
+If you have not created the environment yet, create and activate a new Python 3.7 virtual environment, then install dependencies:
 
-Open Terminal 1:
 ```bash
-airflow webserver --port 8085
+python3.7 -m venv tfx-env
+source tfx-env/bin/activate
+pip install -r requirements.txt
 ```
 
-Open Terminal 2:
+### Step 2: Configure Airflow Workspace
+
 ```bash
-airflow scheduler
+export AIRFLOW_HOME=~/airflow
+airflow db init
+
+mkdir -p $AIRFLOW_HOME/dags
+ln -s $(pwd) $AIRFLOW_HOME/dags/adult_census_tfx
 ```
 
-### Step 3: Run Pipeline in UI
+### Step 3: Initialize Airflow Admin and Start Services
 
-1. Open http://localhost:8085 in your browser.
-2. Unpause the `adult_census_tfx` DAG.
-3. Click the Trigger button to start execution.
+```bash
+airflow users create \
+  --username admin \
+  --password admin \
+  --firstname Team \
+  --lastname COMP315 \
+  --role Admin \
+  --email admin@example.com
 
-### Step 4: Track Experiments in TensorBoard
+airflow webserver -p 8080 &
+airflow scheduler &
+```
+
+### Step 4: Execute Pipeline
+
+1. Access `http://localhost:8080` in your web browser.
+2. Locate the `adult_census_tfx` DAG, toggle the unpause switch, and trigger a run.
+3. Execution outputs and metadata DB will automatically persist under `~/COMP315/airflow_pipeline_outputs/`.
+
+### Step 5: Post Run Notebook Evaluation
+
+* **`eda_analysis.ipynb`**: Standalone dataset analysis covering feature correlations, missing values, and baseline distributions.
+* **`tfma_analysis.ipynb`**: Evaluates model slices and fairness metrics directly from MLMD outputs. Update the `EVAL_RESULT_PATH` variable with your local artifact URI generated during Step 4 before running this notebook.
+
+### Step 6: Track Experiments in TensorBoard
 
 ```bash
 tensorboard --logdir ~/COMP315/airflow_pipeline_outputs/
