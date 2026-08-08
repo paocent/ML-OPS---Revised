@@ -64,11 +64,20 @@ adult_census_tfx/
 
 ## Setup and Execution Guide
 
-### Step 1: Set up the Environment
+### Step 1: Set up or Activate Virtual Environment
+
+If you already created a virtual environment (such as `tfx-env` or `tfx-airflow-env`), activate it:
 
 ```bash
-python3.7 -m venv tfx-airflow-env
-source tfx-airflow-env/bin/activate
+source tfx-env/bin/activate
+# or: source tfx-airflow-env/bin/activate
+```
+
+If you have not created the environment yet, create and activate a new Python 3.7 virtual environment, then install dependencies:
+
+```bash
+python3.7 -m venv tfx-env
+source tfx-env/bin/activate
 pip install -r requirements.txt
 ```
 
