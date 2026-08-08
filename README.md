@@ -64,16 +64,22 @@ adult_census_tfx/
 
 ## Setup and Execution Guide
 
-### Step 1: Set up or Activate Virtual Environment
+### Step 1: Clone Repository and Activate Virtual Environment
 
-If you already created a virtual environment (such as `tfx-env` or `tfx-airflow-env`), activate it:
+Clone the repository to your local machine:
+
+```bash
+git clone [https://github.com/paocent/ML-OPS---Revised.git](https://github.com/paocent/ML-OPS---Revised.git)
+cd ML-OPS---Revised
+```
+
+If you already have your `tfx-env` environment set up, activate it:
 
 ```bash
 source tfx-env/bin/activate
-# or: source tfx-airflow-env/bin/activate
 ```
 
-If you have not created the environment yet, create and activate a new Python 3.7 virtual environment, then install dependencies:
+If you do not have the environment created yet, set up a Python 3.7 environment and install dependencies:
 
 ```bash
 python3.7 -m venv tfx-env
@@ -81,7 +87,9 @@ source tfx-env/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Configure Airflow Workspace
+### Step 2: Link Project to Airflow
+
+Set up your Airflow home directory and symlink the repository folder into your Airflow `dags` folder:
 
 ```bash
 export AIRFLOW_HOME=~/airflow
@@ -93,6 +101,8 @@ ln -s $(pwd) $AIRFLOW_HOME/dags/adult_census_tfx
 
 ### Step 3: Initialize Airflow Admin and Start Services
 
+Create an admin user (if running Airflow for the first time):
+
 ```bash
 airflow users create \
   --username admin \
@@ -101,24 +111,40 @@ airflow users create \
   --lastname COMP315 \
   --role Admin \
   --email admin@example.com
-
-airflow webserver -p 8080 &
-airflow scheduler &
 ```
 
-### Step 4: Execute Pipeline
+Start the webserver and scheduler in separate terminals or in the background:
 
-1. Access `http://localhost:8080` in your web browser.
-2. Locate the `adult_census_tfx` DAG, toggle the unpause switch, and trigger a run.
-3. Execution outputs and metadata DB will automatically persist under `~/COMP315/airflow_pipeline_outputs/`.
+Terminal 1 (Webserver):
+```bash
+airflow webserver -p 8080
+```
 
-### Step 5: Post Run Notebook Evaluation
+Terminal 2 (Scheduler):
+```bash
+airflow scheduler
+```
 
-* **`eda_analysis.ipynb`**: Standalone dataset analysis covering feature correlations, missing values, and baseline distributions.
+### Step 4: Execute Pipeline in Airflow UI
+
+1. Open `http://localhost:8080` in your web browser.
+2. Log in using `admin` / `admin`.
+3. Locate the `adult_census_tfx` DAG.
+4. Toggle the switch on the left to **Unpause** the DAG.
+5. Click the **Play / Trigger** button to start execution.
+6. Pipeline run outputs and the MLMD database will save to `~/COMP315/airflow_pipeline_outputs/`.
+
+### Step 5: Post-Run Notebook Evaluation
+
+* **`eda_analysis.ipynb`**: Dataset analysis covering feature correlations, missing values, and baseline distributions.
 * **`tfma_analysis.ipynb`**: Evaluates model slices and fairness metrics directly from MLMD outputs. Update the `EVAL_RESULT_PATH` variable with your local artifact URI generated during Step 4 before running this notebook.
 
 ### Step 6: Track Experiments in TensorBoard
 
+To view training and evaluation curves in TensorBoard:
+
 ```bash
 tensorboard --logdir ~/COMP315/airflow_pipeline_outputs/
 ```
+
+Navigate to `http://localhost:6006` in your browser.
