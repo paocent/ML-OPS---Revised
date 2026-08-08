@@ -1,0 +1,10 @@
+tfx[airflow-with-mysql]==1.9.1
+apache-airflow==2.3.4
+tensorflow==2.9.3
+tensorflow-transform==1.9.0
+tensorflow-model-analysis==0.40.0
+tensorflow-data-validation==1.9.0
+witwidget==1.8.1
+jupyter==1.0.0
+notebook==6.4.12
+absl-py==1.4.0
