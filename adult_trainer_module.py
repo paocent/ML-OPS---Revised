@@ -5,7 +5,16 @@ import tensorflow_transform as tft
 # Hyperparameters and Feature definitions
 # ─────────────────────────────────────────────
 EPOCHS = 10
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 0.0005
+#1e-3 #to convert this to decimal 0.001
+
+#Default Rate: 0.001 (1e-3)
+
+# 0.0005 (5e-4)
+
+# 0.0001 (1e-4)
+
+# 0.00001 (1e-5)
 
 # ─────────────────────────────────────────────
 # Features dropped from the model (present in the raw CSV, intentionally
