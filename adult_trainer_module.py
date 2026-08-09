@@ -5,8 +5,7 @@ import tensorflow_transform as tft
 # Hyperparameters and Feature definitions
 # ─────────────────────────────────────────────
 EPOCHS = 10
-LEARNING_RATE = 0.0005
-#1e-3 #to convert this to decimal 0.001
+LEARNING_RATE = 1e-3 #to convert this to decimal 0.001
 
 #Default Rate: 0.001 (1e-3)
 
